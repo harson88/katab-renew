@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       actions: write  
-      contents: read
+      contents: write
     
     steps:
     - uses: actions/checkout@v6
@@ -57,3 +57,14 @@ jobs:
             gh run delete $run_id || true
           fi
         done
+
+    - name: Heartbeat commit
+      if: always()
+      run: |
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+        git pull origin main || true
+        echo "Last run: $(date -u)" > heartbeat.txt
+        git add heartbeat.txt
+        git commit -m "heartbeat $(date -u)" || echo "No changes"
+        git push origin HEAD:main    
